@@ -67,12 +67,15 @@ Resources:
                  systemctl start docker.service
                  systemctl enable docker.service
                  kubeadm init
-                 mkdir -p $HOME/.kube
+                 # At this point, root's $HOME is /
+                 mkdir -p /.kube
+                 sudo cp -i /etc/kubernetes/admin.conf /.kube/config
                  kubectl taint node --all=true node-role.kubernetes.io/master:NoSchedule-
                  kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+                 rm -rf /.kube
                  mkdir -p /home/ec2-user/.kube
-                 sudo cp -i /etc/kubernetes/admin.conf /home/ec2-user/.kube/config
-                 chown ec2-user /home/ec2-user/.kube/config
+                 cp -i /etc/kubernetes/admin.conf /home/ec2-user/.kube/config
+                 chown -R ec2-user:ec2-user /home/ec2-user/.kube
                  echo 'source <(kubectl completion bash)' >>/home/ec2-user/.bashrc
                mode: '000500'
                owner: root
